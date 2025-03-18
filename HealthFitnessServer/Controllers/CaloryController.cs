@@ -1,4 +1,5 @@
 ﻿using HealthFitnessServer.DBModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace HealthFitnessServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class CaloryController : ControllerBase
     {
         HealthFitnessContext context = new HealthFitnessContext();
@@ -15,6 +17,11 @@ namespace HealthFitnessServer.Controllers
         public List<Calory> Get()
         {
             return context.Calories.ToList();
+        }
+        [HttpGet("{id}")]
+        public List<Calory> Get(int id)
+        {
+            return context.Calories.Where(x => x.UserId == id).ToList();
         }
         [HttpGet("{date}/{id}")]
         public List<Calory> Get(string date,int id)
@@ -36,11 +43,7 @@ namespace HealthFitnessServer.Controllers
             context.SaveChanges();
             return calory;
         }
-        //[HttpGet("{id}")]
-        //public Calory Get(int id)
-        //{
-        //    return context.Calories.FirstOrDefault(x => x.CalorieId == id);
-        //}
+        
         [HttpDelete("{id}")]
         public void Delete(int id)
         {

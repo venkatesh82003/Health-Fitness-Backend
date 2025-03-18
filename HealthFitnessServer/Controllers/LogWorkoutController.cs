@@ -1,4 +1,5 @@
 ﻿using HealthFitnessServer.DBModel;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,6 +9,7 @@ namespace HealthFitnessServer.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Authorize]
     public class LogWorkoutController : ControllerBase
     {
         HealthFitnessContext context = new HealthFitnessContext();
@@ -15,6 +17,11 @@ namespace HealthFitnessServer.Controllers
         public List<WorkoutLog> Get()
         {
             return context.WorkoutLogs.ToList();
+        }
+        [HttpGet("{id}")]
+        public List<WorkoutLog> Get(int id)
+        {
+            return context.WorkoutLogs.Where(x => x.UserId == id).ToList();
         }
         [HttpPost()]
         public void Post([FromBody] WorkoutLog newWorkout)
@@ -30,11 +37,7 @@ namespace HealthFitnessServer.Controllers
             context.WorkoutLogs.Add(workout);
             context.SaveChanges();
         }
-        [HttpGet("{id}")]
-        public WorkoutLog Get(int id)
-        {
-            return context.WorkoutLogs.FirstOrDefault(x => x.WorkoutId == id);
-        }
+        
         [HttpDelete("{id}")]
         public void Delete(int id)
         {
