@@ -5,6 +5,8 @@ using HealthFitnessServer.DBModel;
 using HealthFitnessServer.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Cryptography;
+using System.Text;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,7 +24,8 @@ namespace HealthFitnessServer.Controllers
         public IActionResult Login([FromBody] LoginModel login)
         {
             HealthFitnessContext context = new HealthFitnessContext();
-            User user = context.Users.FirstOrDefault(x => x.Email.ToLower() == login.Email.ToLower()&&x.PasswordHash==login.PasswordHash);
+            string hashedPassword = GenerateSHA256Hash(login.PasswordHash);
+            User user = context.Users.FirstOrDefault(x => x.Email.ToLower() == login.Email.ToLower()&&(x.PasswordHash==hashedPassword));
             if (user != null)
             {
                 List<Claim> claims = new List<Claim>()
@@ -50,6 +53,19 @@ namespace HealthFitnessServer.Controllers
             else
             {
                 return BadRequest("Invalid Credentials");
+            }
+        }
+        private static string GenerateSHA256Hash(string input)
+        {
+            using (SHA256 sha256 = SHA256.Create())
+            {
+                byte[] bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(input));
+                StringBuilder sb = new StringBuilder();
+                foreach (byte b in bytes)
+                {
+                    sb.Append(b.ToString("x2"));
+                }
+                return sb.ToString();
             }
         }
     }
